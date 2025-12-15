@@ -18,6 +18,7 @@ param llmSlowQuota int = 50
 param llmSlowVersion string = '2025-04-14'
 param location string = deployment().location
 param openaiLocation string
+param locationShort string
 param promptContentFilter bool = true // Should be set to false but requires a custom approval from Microsoft
 param searchLocation string
 
@@ -65,6 +66,7 @@ module app 'app.bicep' = {
     llmSlowVersion: llmSlowVersion
     location: location
     openaiLocation: openaiLocation
+    locationShort: locationShort
     promptContentFilter: promptContentFilter
     searchLocation: searchLocation
     tags: tags

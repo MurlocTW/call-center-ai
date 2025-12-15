@@ -17,6 +17,7 @@ param llmSlowQuota int
 param llmSlowVersion string
 param location string
 param openaiLocation string
+param locationShort string
 param promptContentFilter bool
 param searchLocation string
 param tags object
@@ -550,7 +551,7 @@ resource cognitiveCommunication 'Microsoft.CognitiveServices/accounts@2024-06-01
   }
 }
 
-var aiFoundryName = '${prefix}-${openaiLocation}-foundry'
+var aiFoundryName = '${prefix}-${locationShort}-foundry'
 
 resource aiFoundry 'Microsoft.MachineLearningServices/workspaces@2024-10-01' = {
   name: aiFoundryName
@@ -635,7 +636,7 @@ resource assignmentSearchOpenaiContributor 'Microsoft.Authorization/roleAssignme
 }
 
 resource cognitiveOpenai 'Microsoft.CognitiveServices/accounts@2024-06-01-preview' = {
-  name: '${prefix}-${openaiLocation}-openai'
+  name: '${prefix}-${locationShort}-openai'
   location: openaiLocation
   tags: tags
   sku: {
@@ -643,7 +644,7 @@ resource cognitiveOpenai 'Microsoft.CognitiveServices/accounts@2024-06-01-previe
   }
   kind: 'OpenAI'
   properties: {
-    customSubDomainName: '${prefix}-${openaiLocation}-openai'
+    customSubDomainName: '${prefix}-${locationShort}-openai'
   }
 }
 
@@ -959,7 +960,7 @@ resource assignmentSearchContributor 'Microsoft.Authorization/roleAssignments@20
 }
 
 resource translate 'Microsoft.CognitiveServices/accounts@2024-06-01-preview' = {
-  name: '${prefix}-${location}-translate'
+  name: '${prefix}-${locationShort}-translate'
   location: location
   tags: tags
   sku: {
@@ -967,7 +968,7 @@ resource translate 'Microsoft.CognitiveServices/accounts@2024-06-01-preview' = {
   }
   kind: 'TextTranslation'
   properties: {
-    customSubDomainName: '${prefix}-${location}-translate'
+    customSubDomainName: '${prefix}-${locationShort}-translate'
   }
 }
 

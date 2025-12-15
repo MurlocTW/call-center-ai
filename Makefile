@@ -12,6 +12,7 @@ image_version := main
 cognitive_communication_location := westeurope
 default_location := swedencentral
 openai_location := swedencentral
+location_short := swc
 search_location := francecentral
 # Sanitize variables
 name_sanitized := $(shell echo $(name) | tr '[:upper:]' '[:lower:]')
@@ -145,6 +146,7 @@ deploy-bicep:
 			'imageVersion=$(image_version)' \
 			'instance=$(name)' \
 			'openaiLocation=$(openai_location)' \
+			'locationShort=$(location_short)' \
 			'promptContentFilter=$(prompt_content_filter)' \
 			'searchLocation=$(search_location)' \
 		--template-file cicd/bicep/main.bicep \

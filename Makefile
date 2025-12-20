@@ -156,7 +156,7 @@ deploy-post:
 	@$(MAKE) copy-public \
 		name=$(blob_storage_public_name)
 
-	@$(MAKE) twilio-register \
+	-@$(MAKE) twilio-register \
 		endpoint=$(app_url)
 
 	@$(MAKE) logs name=$(name_sanitized)
@@ -181,8 +181,11 @@ logs:
 
 twilio-register:
 	@echo "⚙️ Registering Twilio webhook..."
-	twilio phone-numbers:update $(twilio_phone_number) \
-		--sms-url $(endpoint)/twilio/sms
+	@if command -v twilio >/dev/null 2>&1 && [ -n "$(twilio_phone_number)" ] && [ "$(twilio_phone_number)" != "null" ]; then \
+		twilio phone-numbers:update $(twilio_phone_number) --sms-url $(endpoint)/twilio/sms; \
+	else \
+		echo "⚠️  Skipping Twilio registration (twilio CLI not found or phone number not configured)"; \
+	fi
 
 copy-public:
 	@echo "📦 Copying public resources..."

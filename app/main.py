@@ -223,6 +223,12 @@ async def webmic_test() -> dict:
     }
 
 
+@api.get("/test-simple")
+async def test_simple_route() -> dict:
+    """Ultra simple test route to verify deployment."""
+    return {"status": "deployed", "message": "This route works!"}
+
+
 @api.get("/health/liveness")
 @start_as_current_span("health_liveness_get")
 async def health_liveness_get() -> None:

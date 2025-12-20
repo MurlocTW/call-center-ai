@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Call Center AI - Web Test</title>
+    <!-- Include Pico.css -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2.0.6/css/pico.min.css" />
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="/static/style.css" />
+    <!-- Import Google Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&display=swap" rel="stylesheet" />
+  </head>
+
+  <body>
+    <div class="flex-container">
+      <div class="titles-container">
+        <!-- Title -->
+        <h1>Call Center AI</h1>
+        <h2>Web Microphone Test Interface</h2>
+      </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="main-container">
+      <main class="container">
+        <article class="center-article">
+          <h3>Test in your browser</h3>
+          <button id="toggleButton" class="black-button">Start Conversation</button>
+          <div id="statusMessage"></div>
+          <pre id="report"></pre>
+        </article>
+      </main>
+    </div>
+
+    <script src="/static/app.js"></script>
+  </body>
+</html>

@@ -33,7 +33,8 @@ from fastapi import (
     WebSocketDisconnect,
 )
 from fastapi.exceptions import RequestValidationError, ValidationException
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
 from htmlmin.minify import html_minify
 from jinja2 import Environment, FileSystemLoader
 from pydantic import Field, TypeAdapter, ValidationError
@@ -178,6 +179,20 @@ api = FastAPI(
     title="call-center-ai",
     version=CONFIG.version,
 )
+
+# Mount static files for Web Mic test interface
+api.mount("/static", StaticFiles(directory=resources_dir("../public")), name="static")
+
+
+@api.get("/")
+@start_as_current_span("webmic_test_page")
+async def webmic_test_page() -> FileResponse:
+    """
+    Serve the Web Mic test interface.
+
+    Returns the HTML page for testing the call center AI via browser microphone.
+    """
+    return FileResponse(resources_dir("../public/index.html"))
 
 
 @api.get("/health/liveness")
@@ -699,6 +714,104 @@ async def communicationservices_wss_post(
                 training_callback=_trigger_training_event,
             ),
         )
+
+
+@api.websocket("/webmic/wss")
+@start_as_current_span("webmic_wss")
+async def webmic_wss(websocket: WebSocket) -> None:
+    """
+    WebSocket endpoint for Web Microphone test interface.
+
+    This endpoint allows testing the call center AI via browser microphone,
+    bypassing the need for actual phone calls through ACS.
+
+    The audio format is PCM 16-bit, 16 kHz, mono (same as ACS).
+    """
+    # Accept connection
+    await websocket.accept()
+    logger.info("Web Mic WebSocket connection established")
+
+    # Create a test call instance for Web Mic
+    # Using a dummy phone number since this is just for testing
+    try:
+        test_call = CallStateModel(
+            initiate=CallInitiateModel(
+                phone_number="+00000000000",  # Dummy number for Web Mic test
+                **CONFIG.conversation.initiate.model_dump(exclude_none=True),
+            )
+        )
+    except Exception as e:
+        logger.error("Failed to create test call instance: %s", e)
+        await websocket.close(code=1011, reason="Failed to initialize call")
+        return
+
+    # Client SDK (may not be needed for Web Mic, but required by on_audio_connected)
+    automation_client = await _use_automation_client()
+
+    # Audio queues
+    audio_in: asyncio.Queue[bytes] = asyncio.Queue()
+    audio_out: asyncio.Queue[bytes | bool] = asyncio.Queue()
+
+    async def _consume_audio() -> None:
+        """
+        Consume raw PCM audio data from the browser WebSocket.
+        """
+        logger.debug("Web Mic audio consumer started")
+
+        with suppress(WebSocketDisconnect):
+            while True:
+                # Receive raw binary PCM data from browser
+                audio_data = await websocket.receive_bytes()
+
+                # Queue audio for processing
+                await audio_in.put(audio_data)
+
+        logger.debug("Web Mic audio consumer stopped")
+
+    async def _send_audio() -> None:
+        """
+        Send audio data back to the browser WebSocket.
+        """
+        logger.debug("Web Mic audio sender started")
+
+        with suppress(WebSocketDisconnect):
+            while True:
+                # Get audio from output queue
+                audio_data = await audio_out.get()
+                audio_out.task_done()
+
+                # Send raw binary PCM data to browser
+                if isinstance(audio_data, bytes):
+                    await websocket.send_bytes(audio_data)
+                # Note: We ignore the "False" stop signal for Web Mic
+                # as it's ACS-specific
+
+        logger.debug("Web Mic audio sender stopped")
+
+    # Process audio using the same pipeline as ACS calls
+    async with get_scheduler() as scheduler:
+        try:
+            await asyncio.gather(
+                # Consume audio from browser
+                _consume_audio(),
+                # Send audio to browser
+                _send_audio(),
+                # Process audio through STT/LLM/TTS pipeline
+                on_audio_connected(
+                    audio_in=audio_in,
+                    audio_out=audio_out,
+                    audio_sample_rate=16000,
+                    call=test_call,
+                    client=automation_client,
+                    post_callback=_trigger_post_event,
+                    scheduler=scheduler,
+                    training_callback=_trigger_training_event,
+                ),
+            )
+        except Exception as e:
+            logger.exception("Error in Web Mic WebSocket: %s", e)
+        finally:
+            logger.info("Web Mic WebSocket connection closed")
 
 
 @api.post("/communicationservices/callback/{call_id}/{secret}")

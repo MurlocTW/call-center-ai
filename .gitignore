@@ -290,6 +290,7 @@ $RECYCLE.BIN/
 # Local app config file
 config*.yaml
 !config-*-example.yaml
+!config.yaml
 
 # Tests default environment
 !tests/.env

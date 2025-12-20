@@ -1,0 +1,26 @@
+conversation:
+  initiate:
+    agent_phone_number: "+33612345678" # Phone number the bot will transfer the call to if customer asks for a human agent
+    bot_company: ai passline
+    bot_name: john
+    lang:
+      default_short_code: zh-TW
+      availables:
+        - pronunciations_en: ["Chinese", "Mandarin", "Taiwanese", "ZN"]
+          short_code: zh-TW
+          voice: zh-TW-HsiaoChenNeural
+        - pronunciations_en: ["English", "EN"]
+          short_code: en-US
+          voice: en-US-AvaMultilingualNeural
+        - pronunciations_en: ["Japanese", "JP", "Japan"]
+          short_code: ja-JP
+          voice: ja-JP-NanamiNeural
+
+communication_services:
+  phone_number: "+33612345678" # Phone number purshased from Communication Services
+
+sms: {}
+
+prompts:
+  llm: {}
+  tts: {}

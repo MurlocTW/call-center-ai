@@ -181,10 +181,6 @@ api = FastAPI(
     version=CONFIG.version,
 )
 
-# Mount static files for Web Mic test interface
-_public_dir = str(Path(__file__).parent.parent / "public")
-api.mount("/static", StaticFiles(directory=_public_dir), name="static")
-
 
 @api.get("/")
 @start_as_current_span("webmic_test_page")
@@ -194,6 +190,7 @@ async def webmic_test_page() -> FileResponse:
 
     Returns the HTML page for testing the call center AI via browser microphone.
     """
+    _public_dir = str(Path(__file__).parent.parent / "public")
     return FileResponse(str(Path(_public_dir) / "index.html"))
 
 
@@ -1266,3 +1263,9 @@ async def _use_automation_client() -> CallAutomationClient:
             CONFIG.communication_services.access_key.get_secret_value()
         ),  # Cannot place calls with RBAC, need to use access key (see: https://learn.microsoft.com/en-us/azure/communication-services/concepts/authentication#authentication-options)
     )
+
+
+# Mount static files for Web Mic test interface
+# NOTE: Must be at the end, after all route definitions
+_public_dir = str(Path(__file__).parent.parent / "public")
+api.mount("/static", StaticFiles(directory=_public_dir), name="static")

@@ -6,6 +6,7 @@ from contextlib import asynccontextmanager
 from datetime import timedelta
 from http import HTTPStatus
 from os import getenv
+from pathlib import Path
 from typing import Annotated, Any
 from urllib.parse import quote_plus, urljoin
 from uuid import UUID
@@ -181,7 +182,8 @@ api = FastAPI(
 )
 
 # Mount static files for Web Mic test interface
-api.mount("/static", StaticFiles(directory=resources_dir("../public")), name="static")
+_public_dir = str(Path(__file__).parent.parent / "public")
+api.mount("/static", StaticFiles(directory=_public_dir), name="static")
 
 
 @api.get("/")
@@ -192,7 +194,7 @@ async def webmic_test_page() -> FileResponse:
 
     Returns the HTML page for testing the call center AI via browser microphone.
     """
-    return FileResponse(resources_dir("../public/index.html"))
+    return FileResponse(str(Path(_public_dir) / "index.html"))
 
 
 @api.get("/health/liveness")

@@ -22,16 +22,32 @@ Azure Speech Services TTS
 
 ## 如何測試
 
-### 1. 啟動應用程式
+### 本地測試
+
+#### 1. 啟動應用程式
 
 ```bash
-cd C:\Github\call-center-ai
+cd /path/to/call-center-ai
 python -m app.main
 ```
 
-### 2. 開啟瀏覽器
+#### 2. 開啟瀏覽器
 
-訪問：`http://localhost:8080` 或您配置的 `public_domain`
+訪問：`http://localhost:8080`
+
+### Azure 部署測試
+
+#### 1. 重新部署應用
+
+```bash
+cd /path/to/call-center-ai
+make deploy
+```
+
+#### 2. 開啟瀏覽器
+
+訪問您的 Azure Container Apps URL，例如：
+`https://call-center-ai.happyground-10bf97cb.swedencentral.azurecontainerapps.io`
 
 ### 3. 測試步驟
 

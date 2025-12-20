@@ -182,7 +182,7 @@ api = FastAPI(
 )
 
 
-@api.get("/")
+@api.get("/webmic")
 @start_as_current_span("webmic_test_page")
 async def webmic_test_page() -> FileResponse:
     """
@@ -206,6 +206,21 @@ async def webmic_test_page() -> FileResponse:
         )
 
     return FileResponse(str(index_path))
+
+
+@api.get("/webmic/test")
+async def webmic_test() -> dict:
+    """
+    Simple test endpoint to verify deployment.
+    """
+    _public_dir = Path(__file__).parent.parent / "public"
+    return {
+        "status": "ok",
+        "message": "Web Mic test endpoint is working",
+        "public_dir": str(_public_dir),
+        "public_dir_exists": _public_dir.exists(),
+        "files": list(str(f) for f in _public_dir.glob("*")) if _public_dir.exists() else [],
+    }
 
 
 @api.get("/health/liveness")

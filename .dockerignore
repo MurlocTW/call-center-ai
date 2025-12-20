@@ -1,4 +1,5 @@
 *
 !app/
+!public/
 !pyproject.toml
 !uv.lock

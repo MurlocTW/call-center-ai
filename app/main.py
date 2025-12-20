@@ -190,8 +190,22 @@ async def webmic_test_page() -> FileResponse:
 
     Returns the HTML page for testing the call center AI via browser microphone.
     """
-    _public_dir = str(Path(__file__).parent.parent / "public")
-    return FileResponse(str(Path(_public_dir) / "index.html"))
+    _public_dir = Path(__file__).parent.parent / "public"
+    index_path = _public_dir / "index.html"
+
+    # Debug logging
+    logger.info("Public dir: %s (exists: %s)", _public_dir, _public_dir.exists())
+    logger.info("Index path: %s (exists: %s)", index_path, index_path.exists())
+
+    # Check if file exists
+    if not index_path.exists():
+        logger.error("index.html not found at %s", index_path)
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail=f"Web Mic test interface not available. File not found: {index_path}",
+        )
+
+    return FileResponse(str(index_path))
 
 
 @api.get("/health/liveness")
@@ -1267,5 +1281,10 @@ async def _use_automation_client() -> CallAutomationClient:
 
 # Mount static files for Web Mic test interface
 # NOTE: Must be at the end, after all route definitions
-_public_dir = str(Path(__file__).parent.parent / "public")
-api.mount("/static", StaticFiles(directory=_public_dir), name="static")
+_public_dir = Path(__file__).parent.parent / "public"
+logger.info("Mounting static files from: %s (exists: %s)", _public_dir, _public_dir.exists())
+if _public_dir.exists():
+    api.mount("/static", StaticFiles(directory=str(_public_dir)), name="static")
+    logger.info("Static files mounted successfully")
+else:
+    logger.warning("Public directory not found, static files not mounted: %s", _public_dir)
